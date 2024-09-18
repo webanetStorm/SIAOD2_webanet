@@ -11,50 +11,52 @@ using namespace std;
 struct City
 {
 
-    int cityCode;
+    int Code;
 
-    char cityName[50];
+    char Name[15];
 
 };
 
 
 void CreateBinaryFile( string filename, int numRecords )
 {
-    ofstream outFile( filename, ios::binary );
-    if ( !outFile )
-    {
-        cerr << "Ошибка при создании файла!" << endl;
-        return;
-    }
+    ofstream file( filename, ios::binary );
 
-    City city;
-    for ( int i = 0; i < numRecords; i++ )
+    if ( file.is_open() )
     {
-        city.cityCode = 10000 + rand() % 90000;
-        snprintf( city.cityName, sizeof( city.cityName ), "City_%d", i + 1 );
-        outFile.write( reinterpret_cast<const char*>( &city ), sizeof( City ) );
-    }
+        City city;
 
-    outFile.close();
-    cout << "Бинарный файл создан." << endl;
+        for ( int i = 0; i < numRecords; i++ )
+        {
+            city.Code = i + 1;
+            snprintf( city.Name, sizeof( city.Name ), "City_%d", i + 1 );
+            file.write( (char*)( &city ), sizeof( City ) );
+        }
+
+        file.close();
+        cout << "Бинарный файл создан\n";
+    }
+    else
+    {
+        cout << "Файл не удалось открыть\n";
+    }
 }
 
 bool LinearSearch( string filename, int key, City& result )
 {
-    ifstream inFile( filename, ios::binary );
-    if ( !inFile )
-    {
-        cerr << "Ошибка при открытии файла!" << endl;
-        return false;
-    }
+    ifstream file( filename, ios::binary );
 
-    City city;
-    while ( inFile.read( reinterpret_cast<char*>( &city ), sizeof( City ) ) )
+    if ( file.is_open() )
     {
-        if ( city.cityCode == key )
+        City city;
+
+        while ( file.read( (char*)&city, sizeof( City ) ) )
         {
-            result = city;
-            return true;
+            if ( city.Code == key )
+            {
+                result = city;
+                return true;
+            }
         }
     }
 
@@ -111,9 +113,9 @@ vector<int> LoadKeys( string filename )
     vector<int> keys;
     City city;
 
-    while ( inFile.read( reinterpret_cast<char*>( &city ), sizeof( City ) ) )
+    while ( inFile.read( (char*)&city, sizeof( City ) ) )
     {
-        keys.push_back( city.cityCode );
+        keys.push_back( city.Code );
     }
 
     return keys;
@@ -121,28 +123,30 @@ vector<int> LoadKeys( string filename )
 
 bool ReadRecordByOffset( string filename, int index, City& result )
 {
-    ifstream inFile( filename, ios::binary );
-    if ( !inFile )
+    ifstream file( filename, ios::binary );
+
+    if ( file.is_open() )
     {
-        cerr << "Ошибка при открытии файла!" << endl;
-        return false;
+        file.seekg( index * sizeof( City ), ios::beg );
+        file.read( (char*)&result, sizeof( City ) );
+
+        return true;
     }
 
-    inFile.seekg( index * sizeof( City ), ios::beg );
-    inFile.read( reinterpret_cast<char*>( &result ), sizeof( City ) );
-
-    return true;
+    return false;
 }
 
 int main()
 {
     setlocale( LC_ALL, "" );
 
-    srand( static_cast<unsigned>( time( 0 ) ) );
+
+    srand( time( 0 ) );
 
     string filename = "cities.dat";
     int numRecords = 1000, key, menu;
     City result;
+
 
     while ( true )
     {
@@ -173,7 +177,7 @@ int main()
                 cin >> key;
 
                 LinearSearch( filename, key, result )
-                    ? cout << "Город найден: Код: " << result.cityCode << ", Название: " << result.cityName << endl
+                    ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
                     : cout << "Город с таким кодом не найден." << endl;
 
                 break;
@@ -188,7 +192,7 @@ int main()
 
                 FibonacciSearch( keys, key, index ) 
                     ? ReadRecordByOffset( filename, index, result )
-                        ? cout << "Город найден: Код: " << result.cityCode << ", Название: " << result.cityName << endl
+                        ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
                         : cout << "Ошибка чтения записи." << endl
                     : cout << "Город с таким кодом не найден." << endl;
 
@@ -205,6 +209,7 @@ int main()
         }
 
     }
+
 
     return 0;
 }
