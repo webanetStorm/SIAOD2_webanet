@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 
 using namespace std;
 
@@ -176,9 +177,15 @@ int main()
                 cout << "Введите код города для поиска: ";
                 cin >> key;
 
+                auto start = chrono::high_resolution_clock::now();
+
                 LinearSearch( filename, key, result )
                     ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
                     : cout << "Город с таким кодом не найден." << endl;
+
+                auto end = chrono::high_resolution_clock::now();
+                chrono::duration<double> timeTaken = end - start;
+                cout << "Время выполнения линейного поиска: " << timeTaken.count() << " секунд\n";
 
                 break;
             }
@@ -190,11 +197,17 @@ int main()
                 cout << "Введите код города для поиска: ";
                 cin >> key;
 
+                auto start = chrono::high_resolution_clock::now();
+
                 FibonacciSearch( keys, key, index ) 
                     ? ReadRecordByOffset( filename, index, result )
                         ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
-                        : cout << "Ошибка чтения записи." << endl
-                    : cout << "Город с таким кодом не найден." << endl;
+                        : cout << "Ошибка чтения записи\n"
+                    : cout << "Город с таким кодом не найден\n";
+
+                auto end = chrono::high_resolution_clock::now();
+                chrono::duration<double> timeTaken = end - start;
+                cout << "Время выполнения поиска Фибоначчи: " << timeTaken.count() << " секунд\n";
 
                 break;
             }
