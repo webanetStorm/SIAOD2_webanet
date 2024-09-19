@@ -9,7 +9,7 @@
 using namespace std;
 
 
-constexpr size_t BITSET_SIZE = 5e6;
+constexpr size_t BITSET_SIZE = 1e7;
 
 const string INPUT_FILE_NAME = "input.txt";
 
@@ -41,40 +41,47 @@ void GenerateInputFile()
 
 void TaskA()
 {
-    bitset<BITSET_SIZE> bitArray;
+    // bitset<BITSET_SIZE> bitArray;
+    vector<unsigned char> bitArray( BITSET_SIZE / 8 + 1, 0 );
     string outputFileName = "output.txt";
-
     ifstream inputFile( INPUT_FILE_NAME );
-    if ( !inputFile )
+
+    if ( inputFile.is_open() )
     {
-        cerr << "Не удалось открыть входной файл" << endl;
-        return;
+        auto start = chrono::high_resolution_clock::now();
+
+        unsigned int number;
+        while ( inputFile >> number )
+        {
+            if ( number < BITSET_SIZE )
+            {
+                // bitArray.set( number );
+                bitArray[number / 8] |= ( 1 << number % 8 );
+            }
+        }
+
+        inputFile.close();
+
+        ofstream outputFile( outputFileName );
+        if ( outputFile.is_open() )
+        {
+            for ( int byteIndex = 0; byteIndex < BITSET_SIZE / 8 + 1; ++byteIndex )
+            {
+                for ( int bitIndex = 0; bitIndex < 8; ++bitIndex )
+                {
+                    if ( bitArray[byteIndex] & ( 1 << bitIndex ) )
+                    {
+                        outputFile << byteIndex * 8 + bitIndex << endl;
+                    }
+                }
+            }
+
+            outputFile.close();
+
+            chrono::duration<double> duration = chrono::high_resolution_clock::now() - start;
+            cout << "Время выполнения программы: " << duration.count() << " секунд\n";
+        }
     }
-
-    auto start = chrono::high_resolution_clock::now();
-
-    unsigned int number;
-    while ( inputFile >> number )
-        if ( number < BITSET_SIZE )
-            bitArray.set( number );
-
-    inputFile.close();
-
-    ofstream outputFile( outputFileName );
-    if ( !outputFile )
-    {
-        cerr << "Не удалось открыть выходной файл" << endl;
-        return;
-    }
-
-    for ( size_t i = 0; i < BITSET_SIZE; i++ )
-        if ( bitArray[i] )
-            outputFile << i << endl;
-
-    outputFile.close();
-
-    chrono::duration<double> duration = chrono::high_resolution_clock::now() - start;
-    cout << "Время выполнения программы: " << duration.count() << " секунд" << endl;
 }
 
 
