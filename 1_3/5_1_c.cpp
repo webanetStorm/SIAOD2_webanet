@@ -11,10 +11,11 @@ using namespace std;
 
 constexpr size_t BITSET_SIZE = 5e6;
 
+const string INPUT_FILE_NAME = "input.txt";
+
 
 void GenerateInputFile()
 {
-    const string FILE_NAME = "input.txt";
     vector<int> numbers( BITSET_SIZE );
 
     for ( size_t i = 0; i < BITSET_SIZE; i++ )
@@ -24,7 +25,7 @@ void GenerateInputFile()
     mt19937 g( rd() );
     shuffle( numbers.begin(), numbers.end(), g );
 
-    ofstream outFile( FILE_NAME );
+    ofstream outFile( INPUT_FILE_NAME );
     if ( !outFile )
     {
         cerr << "Не удалось открыть файл для записи" << endl;
@@ -35,15 +36,15 @@ void GenerateInputFile()
         outFile << num << '\n';
 
     outFile.close();
-    cout << "Файл " << FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами" << endl;
+    cout << "Файл " << INPUT_FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами" << endl;
 }
 
 void TaskA()
 {
     bitset<BITSET_SIZE> bitArray;
-    string inputFileName = "input.txt", outputFileName = "output.txt";
+    string outputFileName = "output.txt";
 
-    ifstream inputFile( inputFileName );
+    ifstream inputFile( INPUT_FILE_NAME );
     if ( !inputFile )
     {
         cerr << "Не удалось открыть входной файл" << endl;
@@ -79,7 +80,7 @@ void TaskA()
 
 void TaskB()
 {
-    cout << "Объем памяти, занимаемый битовым массивом: " << BITSET_SIZE / 8 << " байт." << endl;
+    cout << "Объем памяти, занимаемый битовым массивом: " << BITSET_SIZE / 8 << " байт\n";
 }
 
 int main()

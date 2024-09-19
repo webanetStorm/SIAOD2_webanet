@@ -6,16 +6,12 @@ using namespace std;
 
 unsigned char SetBitToZero( unsigned char x )
 {
-	unsigned char mask = 1;
-
-	return x &= ~( mask << 4 );
+	return x &= ~( 1 << 4 );
 }
 
 unsigned char SetBitToOne( unsigned char x )
 {
-	unsigned char mask = 1;
-
-	return x |= ( mask << 6 );
+	return x |= ( 1 << 6 );
 }
 
 void BitwiseOperations()
@@ -23,7 +19,7 @@ void BitwiseOperations()
 	const int n = sizeof( int ) * 8;
 	unsigned int x = 25, maska = ( 1 << n - 1 );
 
-	cout << "Начальный вид маски: " << bitset<n>( maska ) << endl << "Результат: ";
+	cout << "Начальный вид маски: " << bitset<n>( maska ) << "\nРезультат: ";
 
 	for ( int i = 1; i <= n; i++ )
 	{

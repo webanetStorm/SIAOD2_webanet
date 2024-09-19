@@ -14,20 +14,7 @@
   <component name="ChangeListManager">
     <list default="true" id="926ccdc5-4b3a-4319-bfe4-0d1f37846f8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_1/1_1.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_1/1_1.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/1_1/1_1.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_1/1_1.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/1_1/1_1.vcxproj.filters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_2/1_2.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_2/1_2.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/1_2/1_2.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_2/1_2.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/1_2/1_2.vcxproj.filters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_3/1_3.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_3/1_3.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/1_3/1_3.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/1_3/1_3.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/1_3/1_3.vcxproj.filters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2/2.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/2/2.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/2/2.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2/2.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/2/2.vcxproj.filters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2/cities.dat" beforeDir="false" afterPath="$PROJECT_DIR$/2/cities.dat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SIAOD_webanet.sln" beforeDir="false" afterPath="$PROJECT_DIR$/SIAOD_webanet.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/1_1/5_1_a.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/1_1/5_1_a.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +71,7 @@
       <workItem from="1726418399186" duration="2000" />
       <workItem from="1726599873835" duration="59000" />
       <workItem from="1726599938637" duration="126000" />
-      <workItem from="1726681904925" duration="3589000" />
+      <workItem from="1726681904925" duration="5546000" />
     </task>
     <servers />
   </component>
