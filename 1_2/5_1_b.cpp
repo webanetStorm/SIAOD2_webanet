@@ -4,7 +4,7 @@
 
 using namespace std;
 
-
+    
 void TaskA()
 {
     unsigned char bitArray = 0;

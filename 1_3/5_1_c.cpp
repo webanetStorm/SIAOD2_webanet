@@ -36,7 +36,7 @@ void GenerateInputFile()
         outFile << num << '\n';
 
     outFile.close();
-    cout << "Файл " << INPUT_FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами" << endl;
+    cout << "Файл " << INPUT_FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами\n";
 }
 
 void TaskA()
@@ -90,7 +90,6 @@ void TaskA()
 
     //delete bitArray;
 }
-
 
 void TaskB()
 {
