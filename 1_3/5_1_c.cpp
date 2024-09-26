@@ -21,9 +21,7 @@ void GenerateInputFile()
     for ( size_t i = 0; i < BITSET_SIZE; i++ )
         numbers[i] = i;
 
-    random_device rd;
-    mt19937 g( rd() );
-    shuffle( numbers.begin(), numbers.end(), g );
+    random_shuffle( numbers.begin(), numbers.end() );
 
     ofstream outFile( INPUT_FILE_NAME );
     if ( outFile.is_open() )
