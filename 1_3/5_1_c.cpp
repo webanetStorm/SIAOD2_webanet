@@ -26,17 +26,14 @@ void GenerateInputFile()
     shuffle( numbers.begin(), numbers.end(), g );
 
     ofstream outFile( INPUT_FILE_NAME );
-    if ( !outFile )
+    if ( outFile.is_open() )
     {
-        cerr << "Не удалось открыть файл для записи" << endl;
-        return;
+        for ( auto num : numbers )
+            outFile << num << '\n';
+
+        outFile.close();
+        cout << "Файл " << INPUT_FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами\n";
     }
-
-    for ( auto num : numbers )
-        outFile << num << '\n';
-
-    outFile.close();
-    cout << "Файл " << INPUT_FILE_NAME << " успешно создан с " << BITSET_SIZE << " уникальными числами\n";
 }
 
 void TaskA()

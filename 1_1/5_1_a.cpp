@@ -6,12 +6,16 @@ using namespace std;
 
 unsigned char SetBitToZero( unsigned char x )
 {
-	return x &= ~( 1 << 4 );
+	unsigned char mask = 1;
+
+	return x &= ~( mask << 4 );
 }
 
 unsigned char SetBitToOne( unsigned char x )
 {
-	return x |= ( 1 << 6 );
+	unsigned char mask = 1;
+
+	return x |= ( mask << 6 );
 }
 
 void BitwiseOperations()
