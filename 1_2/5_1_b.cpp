@@ -49,14 +49,14 @@ void TaskB()
         if ( num >= 0 and num <= 63 )
             bitArray |= ( 1ULL << ( 63 - num ) );
         else
-            cout << "Число должно быть от 0 до 63.\n";
+            cout << "Число должно быть от 0 до 63\n";
     }
 
     cout << "Битовое представление: " << bitset<64>( bitArray ) << "\nОтсортированный набор: ";
 
     for ( int i = 0; i < 64; i++ )
         if ( bitArray & ( 1ULL << i ) )
-            cout << i << " ";
+            cout << i << ' ';
 
     cout << endl;
 }
@@ -79,7 +79,7 @@ void TaskC()
         if ( num >= 0 and num < MAX_BITS )
             bitArray[( MAX_BITS - 1 - num ) / 8] |= ( 1 << ( ( MAX_BITS - 1 - num ) % 8 ) );
         else
-            cout << "Число должно быть от 0 до 63.\n";
+            cout << "Число должно быть от 0 до 63\n";
     }
 
     cout << "Битовое представление: ";

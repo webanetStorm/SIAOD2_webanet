@@ -21,14 +21,14 @@ unsigned char SetBitToOne( unsigned char x )
 void BitwiseOperations()
 {
 	const int n = sizeof( int ) * 8;
-	unsigned int x = 25, maska = ( 1 << n - 1 );
+	unsigned int x = 25, mask = ( 1 << n - 1 );
 
-	cout << "Начальный вид маски: " << bitset<n>( maska ) << "\nРезультат: ";
+	cout << "Начальный вид маски: " << bitset<n>( mask ) << "\nРезультат: ";
 
 	for ( int i = 1; i <= n; i++ )
 	{
-		cout << ( ( x & maska ) >> ( n - i ) );
-		maska = maska >> 1;
+		cout << ( ( x & mask ) >> ( n - i ) );
+		mask = mask >> 1;
 	}
 
 	cout << endl;
