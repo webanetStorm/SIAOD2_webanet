@@ -64,9 +64,31 @@ bool LinearSearch( string filename, int key, City& result )
     return false;
 }
 
-bool FibonacciSearch( vector<int> keys, int key, int& index )
+vector<int> LoadKeys( string filename )
 {
+    ifstream inFile( filename, ios::binary );
+    vector<int> keys;
+    City city;
+
+    while ( inFile.read( (char*)&city, sizeof( City ) ) )
+    {
+        keys.push_back( city.Code );
+    }
+
+    return keys;
+}
+
+bool FibonacciSearch( string filename, int key, City& result )
+{
+    vector<int> keys = LoadKeys( filename );
     int fibMMm2 = 0, fibMMm1 = 1, fibM = fibMMm2 + fibMMm1, n = keys.size(), offset = -1;
+
+    ifstream file( filename, ios::binary );
+    if ( !file.is_open() )
+    {
+        cerr << "Не удалось открыть файл\n";
+        return false;
+    }
 
     while ( fibM < n )
     {
@@ -94,48 +116,22 @@ bool FibonacciSearch( vector<int> keys, int key, int& index )
         }
         else
         {
-            index = i;
+            file.seekg( i * sizeof( City ), ios::beg );
+            file.read( (char*)&result, sizeof( City ) );
             return true;
         }
     }
 
     if ( fibMMm1 and keys[offset + 1] == key )
     {
-        index = offset + 1;
-        return true;
-    }
-
-    return false;
-}
-
-vector<int> LoadKeys( string filename )
-{
-    ifstream inFile( filename, ios::binary );
-    vector<int> keys;
-    City city;
-
-    while ( inFile.read( (char*)&city, sizeof( City ) ) )
-    {
-        keys.push_back( city.Code );
-    }
-
-    return keys;
-}
-
-bool ReadRecordByOffset( string filename, int index, City& result )
-{
-    ifstream file( filename, ios::binary );
-
-    if ( file.is_open() )
-    {
-        file.seekg( index * sizeof( City ), ios::beg );
+        file.seekg( ( offset + 1 ) * sizeof( City ), ios::beg );
         file.read( (char*)&result, sizeof( City ) );
-
         return true;
     }
 
     return false;
 }
+
 
 int main()
 {
@@ -145,13 +141,12 @@ int main()
     srand( time( 0 ) );
 
     string filename = "cities.dat";
-    int numRecords = 1000, key, menu;
     City result;
+    int numRecords, key, menu;
 
 
     while ( true )
     {
-
         cout
             << "\t1 - Создать бинарный файл\n"
             << "\t2 - Линейный поиск\n"
@@ -191,18 +186,13 @@ int main()
             }
             case 3:
             {
-                vector<int> keys = LoadKeys( filename );
-                int index;
-
                 cout << "Введите код города для поиска: ";
                 cin >> key;
 
                 auto start = chrono::high_resolution_clock::now();
 
-                FibonacciSearch( keys, key, index ) 
-                    ? ReadRecordByOffset( filename, index, result )
-                        ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
-                        : cout << "Ошибка чтения записи\n"
+                FibonacciSearch( filename, key, result )
+                    ? cout << "Город найден: Код: " << result.Code << ", Название: " << result.Name << endl
                     : cout << "Город с таким кодом не найден\n";
 
                 auto end = chrono::high_resolution_clock::now();
@@ -220,7 +210,6 @@ int main()
                 cout << "Некорректный ввод\n";
             }
         }
-
     }
 
 
