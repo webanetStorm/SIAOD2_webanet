@@ -14,6 +14,7 @@
   <component name="ChangeListManager">
     <list default="true" id="926ccdc5-4b3a-4319-bfe4-0d1f37846f8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SIAOD_webanet.sln" beforeDir="false" afterPath="$PROJECT_DIR$/SIAOD_webanet.sln" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +75,9 @@
       <workItem from="1726999776539" duration="25000" />
       <workItem from="1727000131982" duration="2177000" />
       <workItem from="1727010764388" duration="28000" />
+      <workItem from="1727542482306" duration="1000" />
+      <workItem from="1727628538613" duration="1000" />
+      <workItem from="1728818366438" duration="25000" />
     </task>
     <servers />
   </component>
