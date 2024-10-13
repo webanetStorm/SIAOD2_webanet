@@ -26,7 +26,7 @@ public:
 
     bool operator == ( LibraryRecord other )
     {
-        return ReaderId == other.ReaderId;
+        return this->ReaderId == other.ReaderId;
     }
 
 };
@@ -198,19 +198,15 @@ int main()
         else if ( command == "search" )
         {
             int id;
+
             cout << "Введите номер читательского абонемента для поиска: ";
             cin >> id;
+
             LibraryRecord* record = ht.Search( id );
-            if ( record )
-            {
-                cout << "Найдена запись: Номер читательского: " << record->ReaderId
-                    << ", ФИО: " << record->Name
-                    << ", Адрес: " << record->Address << "\n";
-            }
-            else
-            {
-                cout << "Запись не найдена.\n";
-            }
+
+            record
+                ? cout << "Найдена запись: Номер читательского: " << record->ReaderId << ", ФИО: " << record->Name << ", Адрес: " << record->Address << "\n"
+                : cout << "Запись не найдена.\n";
         }
         else if ( command == "display" )
         {
