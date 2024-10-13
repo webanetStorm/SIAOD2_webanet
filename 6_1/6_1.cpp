@@ -53,17 +53,18 @@ private:
 
     void Rehash()
     {
-        cout << "Рехеширование... Текущий размер таблицы: " << this->_tableSize << "\n";
+        cout << "Рехеширование... Текущий размер таблицы: " << this->_tableSize << endl;
 
+        int oldTableSize = this->_tableSize;
         this->_tableSize *= 2;
         vector<list<LibraryRecord>> newTable( this->_tableSize );
 
-        for ( int i = 0; i < this->_tableSize; ++i )
-            for ( auto record : this->_table[i] )
-                newTable[HashFunction( record.ReaderId )].push_back( record );
+        for ( int i = 0; i < oldTableSize; i++ )
+            for ( auto& record : this->_table[i] )
+                newTable[this->HashFunction( record.ReaderId )].push_back( record );
 
         this->_table = move( newTable );
-        cout << "Рехеширование завершено. Новый размер таблицы: " << this->_tableSize << "\n";
+        cout << "Рехеширование завершено. Новый размер таблицы: " << this->_tableSize << endl;
     }
 
 
@@ -117,7 +118,9 @@ public:
 
     LibraryRecord* Search( int key )
     {
-        for ( auto record : this->_table[this->HashFunction( key )] )
+        int hash = this->HashFunction( key );
+
+        for ( auto& record : this->_table[hash] )
             if ( record.ReaderId == key )
                 return &record;
 
