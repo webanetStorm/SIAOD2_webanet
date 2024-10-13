@@ -19,36 +19,44 @@ int LinearSearch( string text, string pattern )
         if ( j == patternLen )
             return i;
     }
+
     return -1;
 }
 
+
 vector<int> BuildShiftTable( string pattern )
 {
-    int patternLen = pattern.length();
-    vector<int> shiftTable( 256, patternLen );
+    const int ALPHABET_SIZE = 256;
+    int m = pattern.length();
+    vector<int> table( ALPHABET_SIZE, m );
 
-    for ( int i = 0; i < patternLen - 1; i++ )
-        shiftTable[(unsigned char)( pattern[i] )] = patternLen - 1 - i;
+    for ( int i = 0; i < m - 1; i++ )
+        table[(unsigned char)pattern[i]] = m - 1 - i;
 
-    return shiftTable;
+    return table;
 }
 
-int BMHSearchLastOccurrence( string text, string pattern )
+int BMHSearch( string text, string pattern )
 {
-    vector<int> shiftTable = BuildShiftTable( pattern );
-    int textLen = text.length(), patternLen = pattern.length(), i = textLen - patternLen;
+    int n = text.length(), m = pattern.length();
 
-    while ( i >= 0 )
+    if ( m > n )
+        return -1;
+
+    vector<int> badCharTable = BuildShiftTable( pattern );
+    int i = 0;
+
+    while ( i <= n - m )
     {
-        int j = patternLen - 1;
+        int j = m - 1;
 
-        while ( j >= 0 and text[i + j] == pattern[j] )
+        while ( j >= 0 and pattern[j] == text[i + j] )
             j--;
 
         if ( j < 0 )
             return i;
 
-        i -= shiftTable[(unsigned char)( text[i + patternLen - 1] )];
+        i += badCharTable[(unsigned char)text[i + m - 1]];
     }
 
     return -1;
@@ -60,12 +68,19 @@ int main()
     setlocale( LC_ALL, "" );
 
 
-    string text = "Это тестовый текст для поиска. И ещё один поиск", pattern = "поиск";
+    string text, pattern;
     int index, menu;
+
+    cout << "Введите текст: ";
+    getline( cin, text );
+
+    cout << "Введите образец: ";
+    getline( cin, pattern );
+
 
     while ( true )
     {
-        cout << "\tМеню:\n\t1 - Линейный поиск\n\t2 - Поиск Бойера-Мура-Хорспула\n";
+        cout << "\tМеню:\n\t1 - Линейный поиск\n\t2 - Поиск Бойера-Мура-Хорспула\nВыберите действие: ";
         cin >> menu;
 
         switch ( menu )
@@ -74,7 +89,7 @@ int main()
                 index = LinearSearch( text, pattern );
                 break;
             case 2:
-                index = BMHSearchLastOccurrence( text, pattern );
+                index = BMHSearch( text, pattern );
                 break;
             default:
                 cout << "Неизвестная команда\n";
@@ -82,8 +97,8 @@ int main()
         }
 
         index != -1
-            ? cout << "Первое вхождение подстроки найдено на позиции: " << index << "\n\n"
-            : cout << "Подстрока не найдена\n\n";
+            ? cout << "Первое вхождение подстроки найдено на позиции: " << index << endl
+            : cout << "Подстрока не найдена\n";
     }
 
 
