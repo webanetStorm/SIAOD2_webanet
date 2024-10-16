@@ -1,71 +1,70 @@
-﻿#include <iostream>
+﻿#include <unordered_map>
+#include <Windows.h>
+#include <iostream>
 #include <string>
 #include <vector>
 
 using namespace std;
 
 
-int LinearSearch( string text, string pattern )
+int LinearSearch( string needle, string haystack )
 {
-    int textLen = text.length(), patternLen = pattern.length();
+    int haystackLength = haystack.length(), needleLength = needle.length();
 
-    for ( int i = 0; i <= textLen - patternLen; i++ )
+    for ( int i = 0; i <= haystackLength - needleLength; i++ )
     {
         int j = 0;
 
-        while ( j < patternLen and text[i + j] == pattern[j] )
+        while ( j < needleLength and haystack[i + j] == needle[j] )
             j++;
 
-        if ( j == patternLen )
+        if ( j == needleLength )
             return i;
     }
 
     return -1;
 }
 
-
-vector<int> BuildShiftTable( string pattern )
+unordered_map<char, int> CreateShiftTable( string needle )
 {
-    const int ALPHABET_SIZE = 256;
-    int m = pattern.length();
-    vector<int> table( ALPHABET_SIZE, m );
+    unordered_map<char, int> shiftTable;
+    int needleLength = needle.length();
 
-    for ( int i = 0; i < m - 1; i++ )
-        table[(unsigned char)pattern[i]] = m - 1 - i;
+    for ( int i = 0; i < needleLength - 1; i++ )
+        shiftTable[needle[i]] = needleLength - i - 1;
 
-    return table;
+    return shiftTable;
 }
 
-int BMHSearch( string text, string pattern )
+int BMHSearch( string needle, string haystack )
 {
-    int n = text.length(), m = pattern.length();
+    int haystackLength = haystack.length(), needleLength = needle.length(), lastOccurrence = -1, i = 0;
 
-    if ( m > n )
+    if ( needleLength > haystackLength ) 
         return -1;
 
-    vector<int> badCharTable = BuildShiftTable( pattern );
-    int i = 0;
+    unordered_map<char, int> shiftTable = CreateShiftTable( needle );
 
-    while ( i <= n - m )
+    while ( i <= haystackLength - needleLength )
     {
-        int j = m - 1;
+        int j = needleLength - 1;
 
-        while ( j >= 0 and pattern[j] == text[i + j] )
+        while ( j >= 0 and haystack[i + j] == needle[j] )
             j--;
 
-        if ( j < 0 )
-            return i;
-
-        i += badCharTable[(unsigned char)text[i + m - 1]];
+        j == -1
+            ? lastOccurrence = i++
+            : i += shiftTable.count( haystack[i + needleLength - 1] ) ? shiftTable[haystack[i + needleLength - 1]] : needleLength;
     }
 
-    return -1;
+    return lastOccurrence;
 }
 
 
 int main()
 {
-    setlocale( LC_ALL, "" );
+    SetConsoleCP( 1251 );
+    SetConsoleOutputCP( 1251 );
 
 
     string text, pattern;
@@ -86,10 +85,10 @@ int main()
         switch ( menu )
         {
             case 1:
-                index = LinearSearch( text, pattern );
+                index = LinearSearch( pattern, text );
                 break;
             case 2:
-                index = BMHSearch( text, pattern );
+                index = BMHSearch( pattern, text );
                 break;
             default:
                 cout << "Неизвестная команда\n";
@@ -97,7 +96,7 @@ int main()
         }
 
         index != -1
-            ? cout << "Первое вхождение подстроки найдено на позиции: " << index << endl
+            ? cout << "Найдено вхождение подстроки на позиции: " << index << endl
             : cout << "Подстрока не найдена\n";
     }
 
