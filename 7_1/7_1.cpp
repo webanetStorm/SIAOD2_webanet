@@ -295,7 +295,7 @@ public:
     void Display()
     {
         if ( _root ) 
-Display( _root, "", true );
+            Display( _root, "", true );
     }
 
 };
