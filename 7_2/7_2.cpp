@@ -1,289 +1,133 @@
 ﻿#include <algorithm>
 #include <iostream>
-#include <string>
+#include <vector>
 
 using namespace std;
 
 
-struct Node
+struct Edge
 {
 
-    string Key;
+    int Src, Dest, Weight;
 
-    Node* Left;
+};
 
-    Node* Right;
+struct Subset
+{
 
-    int Height;
-
-
-    Node( string k ) : Key( k ), Height( 1 ), Left( nullptr ), Right( nullptr )
-    {
-    }
+    int Parent, Rank;
 
 };
 
 
-class AVLTree
+class Graph
 {
-
-private:
-
-    int Height( Node* n )
-    {
-        return n == nullptr ? 0 : n->Height;
-    }
-
-    int GetBalance( Node* n )
-    {
-        return n == nullptr ? 0 : Height( n->Left ) - Height( n->Right );
-    }
-
-    void UpdateHeight( Node* n )
-    {
-        if ( n )
-            n->Height = 1 + max( Height( n->Left ), Height( n->Right ) );
-    }
-
-    Node* RotateRight( Node* y )
-    {
-        Node* x = y->Left;
-        Node* T = x->Right;
-
-        x->Right = y;
-        y->Left = T;
-
-        UpdateHeight( y );
-        UpdateHeight( x );
-
-        return x;
-    }
-
-    Node* RotateLeft( Node* x )
-    {
-        Node* y = x->Right;
-        Node* T = y->Left;
-
-        y->Left = x;
-        x->Right = T;
-
-        UpdateHeight( x );
-        UpdateHeight( y );
-
-        return y;
-    }
-
-    Node* Insert( Node* node, string Key )
-    {
-        if ( node == nullptr )
-            return new Node( Key );
-
-        if ( Key < node->Key )
-            node->Left = Insert( node->Left, Key );
-        else if ( Key > node->Key )
-            node->Right = Insert( node->Right, Key );
-        else
-            return node;
-
-        UpdateHeight( node );
-
-        int balance = GetBalance( node );
-
-        if ( balance > 1 && Key < node->Left->Key )
-            return RotateRight( node );
-
-        if ( balance < -1 && Key > node->Right->Key )
-            return RotateLeft( node );
-
-        if ( balance > 1 && Key > node->Left->Key )
-        {
-            node->Left = RotateLeft( node->Left );
-            return RotateRight( node );
-        }
-
-        if ( balance < -1 && Key < node->Right->Key )
-        {
-            node->Right = RotateRight( node->Right );
-            return RotateLeft( node );
-        }
-
-        return node;
-    }
-
-    Node* Remove( Node* node, string Key )
-    {
-        if ( node == nullptr )
-            return node;
-
-        if ( Key < node->Key )
-        {
-            node->Left = Remove( node->Left, Key );
-        }
-        else if ( Key > node->Key )
-        {
-            node->Right = Remove( node->Right, Key );
-        }
-        else
-        {
-            if ( node->Left == nullptr || node->Right == nullptr )
-            {
-                Node* temp = node->Left ? node->Left : node->Right;
-
-                if ( temp == nullptr )
-                {
-                    temp = node;
-                    node = nullptr;
-                }
-                else
-                    *node = *temp;
-
-                delete temp;
-            }
-            else
-            {
-                Node* temp = MinValueNode( node->Right );
-                node->Key = temp->Key;
-                node->Right = Remove( node->Right, temp->Key );
-            }
-        }
-
-        if ( node == nullptr )
-            return node;
-
-        UpdateHeight( node );
-
-        int balance = GetBalance( node );
-
-        if ( balance > 1 && GetBalance( node->Left ) >= 0 )
-            return RotateRight( node );
-
-        if ( balance > 1 && GetBalance( node->Left ) < 0 )
-        {
-            node->Left = RotateLeft( node->Left );
-            return RotateRight( node );
-        }
-
-        if ( balance < -1 && GetBalance( node->Right ) <= 0 )
-            return RotateLeft( node );
-
-        if ( balance < -1 && GetBalance( node->Right ) > 0 )
-        {
-            node->Right = RotateRight( node->Right );
-            return RotateLeft( node );
-        }
-
-        return node;
-    }
-
-    Node* MinValueNode( Node* node )
-    {
-        Node* current = node;
-
-        while ( current->Left != nullptr )
-            current = current->Left;
-
-        return current;
-    }
-
-    void PreOrder( Node* node )
-    {
-        if ( node != nullptr )
-        {
-            cout << node->Key << " ";
-
-            PreOrder( node->Left );
-            PreOrder( node->Right );
-        }
-    }
-
-    void InOrder( Node* node )
-    {
-        if ( node != nullptr )
-        {
-            InOrder( node->Left );
-            cout << node->Key << " ";
-            InOrder( node->Right );
-        }
-    }
-
-    void PostOrder( Node* node )
-    {
-        if ( node != nullptr )
-        {
-            PostOrder( node->Left );
-            PostOrder( node->Right );
-            cout << node->Key << " ";
-        }
-    }
-
-    void Display( Node* node, string indent, bool last )
-    {
-        if ( node != nullptr )
-        {
-            cout << indent;
-
-            if ( last )
-            {
-                cout << "R----";
-                indent += "   ";
-            }
-            else
-            {
-                cout << "L----";
-                indent += "|  ";
-            }
-
-            cout << node->Key << endl;
-
-            Display( node->Left, indent, false );
-            Display( node->Right, indent, true );
-        }
-    }
-
 
 public:
 
-    Node* Root;
+    vector<Edge> Edges;
+
+    int V, E;
 
 
-    AVLTree() : Root( nullptr )
+    Graph( int V, int E ) : V( V ), E( E )
     {
     }
 
-    void Insert( string Key )
+    void AddEdge( int Src, int Dest, int Weight )
     {
-        Root = Insert( Root, Key );
-    }
-
-    void Remove( string Key )
-    {
-        Root = Remove( Root, Key );
-    }
-
-    void PreOrder()
-    {
-        PreOrder( Root );
-        cout << endl;
-    }
-
-    void InOrder()
-    {
-        InOrder( Root );
-        cout << endl;
-    }
-
-    void PostOrder()
-    {
-        PostOrder( Root );
-        cout << endl;
-    }
-
-    void Display()
-    {
-        Display( Root, "", true );
+        Edges.push_back( { Src, Dest, Weight } );
     }
 
 };
+
+
+int Find( Subset subsets[], int i )
+{
+    if ( subsets[i].Parent != i )
+        subsets[i].Parent = Find( subsets, subsets[i].Parent );
+
+    return subsets[i].Parent;
+}
+
+void Union( Subset subsets[], int x, int y )
+{
+    int xroot = Find( subsets, x ), yroot = Find( subsets, y );
+
+    if ( subsets[xroot].Rank < subsets[yroot].Rank )
+    {
+        subsets[xroot].Parent = yroot;
+    }
+    else if ( subsets[xroot].Rank > subsets[yroot].Rank )
+    {
+        subsets[yroot].Parent = xroot;
+    }
+    else
+    {
+        subsets[yroot].Parent = xroot;
+        subsets[xroot].Rank++;
+    }
+}
+
+void KruskalMST( Graph& graph )
+{
+    vector<Edge> result;
+    int e = 0, i = 0;
+
+    sort( graph.Edges.begin(), graph.Edges.end(), []( Edge a, Edge b )
+    {
+        return a.Weight < b.Weight;
+    } );
+
+    Subset* subsets = new Subset[graph.V + 1];
+    for ( int v = 0; v <= graph.V; ++v )
+    {
+        subsets[v].Parent = v;
+        subsets[v].Rank = 0;
+    }
+
+    while ( e < graph.V - 1 and i < graph.E )
+    {
+        Edge next_edge = graph.Edges[i++];
+
+        int x = Find( subsets, next_edge.Src ), y = Find( subsets, next_edge.Dest );
+
+        if ( x != y )
+        {
+            result.push_back( next_edge );
+            Union( subsets, x, y );
+            e++;
+        }
+    }
+
+    cout << "Минимальное остовное дерево (MST):\n";
+    for ( auto edge : result )
+        cout << edge.Src << " -- " << edge.Dest << " == " << edge.Weight << endl;
+
+    delete[] subsets;
+}
+
+Graph InputGraph()
+{
+    int V, E;
+
+    cout << "Введите количество вершин: ";
+    cin >> V;
+    cout << "Введите количество ребер: ";
+    cin >> E;
+
+    Graph graph( V, E );
+
+    cout << "Введите ребра (формат: src dest weight):\n";
+    for ( int i = 0; i < E; i++ )
+    {
+        int Src, Dest, Weight;
+        cin >> Src >> Dest >> Weight;
+        graph.AddEdge( Src, Dest, Weight );
+    }
+
+    return graph;
+}
 
 
 int main()
@@ -291,32 +135,10 @@ int main()
     setlocale( LC_ALL, "" );
 
 
-    AVLTree tree;
+    cout << "Создание графа...\n";
+    Graph graph = InputGraph();
 
-    cout << "Введите 10 ключей для AVL-дерева: ";
-    for ( int i = 0; i < 10; i++ )
-    {
-        string Key;
-        cin >> Key;
-        tree.Insert( Key );
-    }
-
-    cout << "\nСимметричный обход: ";
-    tree.InOrder();
-
-    cout << "\nУдалите элемент: ";
-    string keyToRemove;
-    cin >> keyToRemove;
-    tree.Remove( keyToRemove );
-
-    cout << "\nДерево после удаления: \n";
-    tree.Display();
-
-    cout << "\nПрямой обход: ";
-    tree.PreOrder();
-
-    cout << "\nОбратный обход: ";
-    tree.PostOrder();
+    KruskalMST( graph );
 
 
     return 0;
