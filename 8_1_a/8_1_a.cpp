@@ -1,127 +1,200 @@
-﻿#include <iostream>
+﻿#include <string>
 #include <vector>
 #include <map>
+#include <iostream>
 #include <algorithm>
-#include <string>
-#include <iomanip>
-#include <tuple>
+#include <fstream>
+#include <bitset>
+#include <windows.h>
 
-// ======== МЕТОД ШЕННОНА-ФАНО ========
+using namespace std;
+
 struct Symbol
 {
-    char ch;
-    int freq;
-    std::string code;
+    char character;
+    double probability;
+    string code;
+
+    Symbol( char ch, double prob, const string& c ) : character( ch ), probability( prob ), code( c )
+    {
+    }
 };
-bool compare( const Symbol &a, const Symbol &b )
+
+bool compareByProbability( const Symbol& a, const Symbol& b )
 {
-    return a.freq > b.freq;
+    return a.probability > b.probability;
 }
-void shannonFano( std::vector<Symbol> &symbols, int start, int end )
+
+void shannonFanoCode( vector<Symbol>& symbols, int start, int end )
 {
     if ( start >= end ) return;
-    int totalFreq = 0, splitFreq = 0, split = start;
-    for ( int i = start; i <= end; i++ ) totalFreq += symbols[i].freq;
-    while ( splitFreq < totalFreq / 2 && split < end ) splitFreq += symbols[split++].freq;
-    for ( int i = start; i < split; i++ ) symbols[i].code += "0";
-    for ( int i = split; i <= end; i++ ) symbols[i].code += "1";
-    shannonFano( symbols, start, split - 1 );
-    shannonFano( symbols, split, end );
-}
-void shannonFanoEncode( const std::string &text )
-{
-    std::map<char, int> freqMap;
-    for ( char ch : text ) freqMap[ch]++;
-    std::vector<Symbol> symbols;
-    for ( auto &pair : freqMap ) symbols.push_back( { pair.first, pair.second, "" } );
-    std::sort( symbols.begin(), symbols.end(), compare );
-    shannonFano( symbols, 0, symbols.size() - 1 );
 
-    std::string encodedText;
+    int splitIndex = start;
+    double totalProbLeft = 0, totalProbRight = 0;
+
+    for ( int i = start; i <= end; i++ )
+    {
+        totalProbRight += symbols[i].probability;
+    }
+
+    double diff = totalProbRight;
+    for ( int i = start; i <= end; i++ )
+    {
+        totalProbLeft += symbols[i].probability;
+        totalProbRight -= symbols[i].probability;
+
+        if ( abs( totalProbLeft - totalProbRight ) < diff )
+        {
+            diff = abs( totalProbLeft - totalProbRight );
+            splitIndex = i;
+        }
+    }
+
+    for ( int i = start; i <= splitIndex; i++ )
+    {
+        symbols[i].code += "0";
+    }
+    for ( int i = splitIndex + 1; i <= end; i++ )
+    {
+        symbols[i].code += "1";
+    }
+
+    shannonFanoCode( symbols, start, splitIndex );
+    shannonFanoCode( symbols, splitIndex + 1, end );
+}
+
+string encodeText( string& text, map<char, string>& encodingMap )
+{
+    string encodedText;
     for ( char ch : text )
-        for ( auto &sym : symbols )
-            if ( sym.ch == ch ) encodedText += sym.code;
-
-    std::cout << "Закодированный текст (Шеннон-Фано): " << encodedText << "\n";
-}
-
-// ======== МЕТОД LZ77 ========
-struct LZ77
-{
-    int offset, length;
-    char nextChar;
-};
-void LZ77Encode( const std::string &input )
-{
-    int windowSize = 10;
-    std::vector<LZ77> encoded;
-    int pos = 0;
-    while ( pos < input.size() )
     {
-        int bestOffset = 0, bestLength = 0;
-        for ( int back = 1; back <= windowSize && pos - back >= 0; back++ )
-        {
-            int matchLength = 0;
-            while ( matchLength < input.size() - pos && input[pos - back + matchLength] == input[pos + matchLength] )
-                matchLength++;
-            if ( matchLength > bestLength )
-            {
-                bestOffset = back;
-                bestLength = matchLength;
-            }
-        }
-        char nextChar = ( pos + bestLength < input.size() ) ? input[pos + bestLength] : '\0';
-        encoded.push_back( { bestOffset, bestLength, nextChar } );
-        pos += bestLength + 1;
+        encodedText += encodingMap.at( ch );
     }
-
-    std::cout << "Закодированные блоки (LZ77):\n";
-    for ( auto &block : encoded )
-        std::cout << "(" << block.offset << ", " << block.length << ", " << block.nextChar << ")\n";
+    return encodedText;
 }
 
-// ======== МЕТОД LZ78 ========
-void LZ78Encode( const std::string &input )
+string decodeText( const string& encodedText, map<string, char>& decodingMap )
 {
-    std::map<std::string, int> dictionary;
-    std::vector<std::pair<int, char>> encoded;
-    std::string current = "";
-    int dictIndex = 1;
-
-    for ( char ch : input )
+    string decodedText;
+    string temp;
+    for ( char bit : encodedText )
     {
-        current += ch;
-        if ( dictionary.find( current ) == dictionary.end() )
+        temp += bit;
+        if ( decodingMap.find( temp ) != decodingMap.end() )
         {
-            dictionary[current] = dictIndex++;
-            encoded.push_back( { dictionary[current.substr( 0, current.size() - 1 )], ch } );
-            current = "";
+            decodedText += decodingMap.at( temp );
+            temp.clear();
         }
     }
-    if ( !current.empty() ) encoded.push_back( { dictionary[current], '\0' } );
-
-    std::cout << "Закодированные пары (LZ78):\n";
-    for ( auto &pair : encoded )
-        std::cout << "(" << pair.first << ", " << pair.second << ")\n";
+    return decodedText;
 }
 
-// ======== MAIN ========
+void writeBinaryFile( const string& filename, const string& bitString )
+{
+    ofstream outputFile( filename, ios::binary );
+    if ( !outputFile )
+    {
+        cerr << "Error opening output file." << endl;
+        return;
+    }
+
+    for ( size_t i = 0; i < bitString.size(); i += 8 )
+    {
+        bitset<8> byte( bitString.substr( i, 8 ) );
+        outputFile.put( static_cast<char>( byte.to_ulong() ) );
+    }
+    outputFile.close();
+}
+
+string readBinaryFile( const string& filename )
+{
+    ifstream inputFile( filename, ios::binary );
+    if ( !inputFile )
+    {
+        cerr << "Error opening input file." << endl;
+        return "";
+    }
+
+    string bitString;
+    char byte;
+    while ( inputFile.get( byte ) )
+    {
+        bitset<8> bits( byte );
+        bitString += bits.to_string();
+    }
+
+    inputFile.close();
+    return bitString;
+}
+
+size_t getFileSize( const string& filename )
+{
+    ifstream file( filename, ios::binary | ios::ate );
+    return file.tellg();
+}
+
+double calculateCompressionRatio( const string& inputFilename, const string& encodedFilename )
+{
+    return static_cast<double>( getFileSize( inputFilename ) ) / getFileSize( encodedFilename );
+}
+
 int main()
 {
     setlocale( LC_ALL, "" );
+    string inputText;
+    ifstream inputFile( "input.txt" );
 
-    std::string text1 = "Кот пошёл за молоком, А котята кувырком. Кот пришёл без молока, А котята ха-ха-ха.";
-    std::string binary = "10101001101100111010";
-    std::string text2 = "bigbonebigborebigbo";
+    if ( !inputFile.is_open() )
+    {
+        cout << "Ошибка открытия файла\n";
+        return 1;
+    }
+    getline( inputFile, inputText, '\0' );
+    inputFile.close();
 
-    std::cout << "==== ШЕННОН-ФАНО ====\n";
-    shannonFanoEncode( text1 );
+    map<char, int> frequencyMap;
+    for ( char ch : inputText )
+    {
+        frequencyMap[ch]++;
+    }
 
-    std::cout << "\n==== LZ77 ====\n";
-    LZ77Encode( binary );
+    vector<Symbol> symbols;
+    for ( const auto& pair : frequencyMap )
+    {
+        symbols.emplace_back( pair.first, static_cast<double>( pair.second ) / inputText.size(), "" );
+    }
 
-    std::cout << "\n==== LZ78 ====\n";
-    LZ78Encode( text2 );
+    sort( symbols.begin(), symbols.end(), compareByProbability );
+
+    shannonFanoCode( symbols, 0, symbols.size() - 1 );
+
+    map<char, string> encodingMap;
+    map<string, char> decodingMap;
+
+
+    for ( const auto& symbol : symbols )
+    {
+        encodingMap[symbol.character] = symbol.code;
+        decodingMap[symbol.code] = symbol.character;
+    }
+
+    string encodedText = encodeText( inputText, encodingMap );
+
+    writeBinaryFile( "encoded.bin", encodedText );
+    ofstream encodedFile( "encoded.txt" );
+    encodedFile << encodedText;
+    encodedFile.close();
+
+    string readEncodedText = readBinaryFile( "encoded.bin" );
+    string decodedText = decodeText( encodedText, decodingMap );
+    ofstream decodedFile( "decoded.txt" );
+    decodedFile << decodedText;
+    decodedFile.close();
+
+    cout << "Размер оригинального файла: " << getFileSize( "input.txt" ) << " bytes" << endl;
+    cout << "Размер сжатого файла: " << getFileSize( "encoded.bin" ) << " bytes" << endl;
+    double compressionRatio = calculateCompressionRatio( "input.txt", "encoded.bin" );
+    cout << "Коэффициент сжатия: " << compressionRatio << endl;
 
     return 0;
 }

@@ -1,132 +1,220 @@
 ﻿#include <iostream>
-#include <vector>
-#include <map>
 #include <queue>
+#include <map>
+#include <vector>
+#include <fstream>
+#include <locale>
+#include <cmath>
+#include "Windows.h"
 #include <string>
-#include <algorithm>
-#include <iomanip>
 
-// ======== ШЕННОН-ФАНО ========
-struct Symbol
+using namespace std;
+
+struct Node
 {
-    char ch;
-    int freq;
-    std::string code;
-};
-bool compare( const Symbol &a, const Symbol &b )
-{
-    return a.freq > b.freq;
-}
-void shannonFano( std::vector<Symbol> &symbols, int start, int end )
-{
-    if ( start >= end ) return;
-    int totalFreq = 0, splitFreq = 0, split = start;
-    for ( int i = start; i <= end; i++ ) totalFreq += symbols[i].freq;
-    while ( splitFreq < totalFreq / 2 && split < end ) splitFreq += symbols[split++].freq;
-    for ( int i = start; i < split; i++ ) symbols[i].code += "0";
-    for ( int i = split; i <= end; i++ ) symbols[i].code += "1";
-    shannonFano( symbols, start, split - 1 );
-    shannonFano( symbols, split, end );
-}
-std::string shannonFanoCompress( const std::string &text, std::map<char, std::string> &codeMap )
-{
-    std::map<char, int> freqMap;
-    for ( char ch : text ) freqMap[ch]++;
-    std::vector<Symbol> symbols;
-    for ( auto &pair : freqMap ) symbols.push_back( { pair.first, pair.second, "" } );
-    std::sort( symbols.begin(), symbols.end(), compare );
-    shannonFano( symbols, 0, symbols.size() - 1 );
-    for ( auto &sym : symbols ) codeMap[sym.ch] = sym.code;
-    std::string encoded;
-    for ( char ch : text ) encoded += codeMap[ch];
-    return encoded;
-}
-std::string shannonFanoDecompress( const std::string &encoded, std::map<std::string, char> &reverseMap )
-{
-    std::string decoded, buffer;
-    for ( char bit : encoded )
+    char character;
+    int frequency;
+    Node *left, *right;
+
+    Node( char character, int frequency )
     {
-        buffer += bit;
-        if ( reverseMap.find( buffer ) != reverseMap.end() )
+        left = right = nullptr;
+        this->character = character;
+        this->frequency = frequency;
+    }
+};
+
+struct Compare
+{
+    bool operator()( Node* left, Node* right )
+    {
+        return left->frequency > right->frequency;
+    }
+};
+
+void generateHuffmanCodes( Node* root, string code, map<char, string>& huffmanCodes )
+{
+    if ( !root ) return;
+
+    if ( !root->left && !root->right )
+    {
+        huffmanCodes[root->character] = code;
+    }
+
+    generateHuffmanCodes( root->left, code + "0", huffmanCodes );
+    generateHuffmanCodes( root->right, code + "1", huffmanCodes );
+}
+
+map<char, string> buildHuffmanTree( const string& text )
+{
+
+    map<char, int> frequencyMap;
+    for ( char ch : text )
+    {
+        frequencyMap[ch]++;
+    }
+
+    priority_queue<Node*, vector<Node*>, Compare> minHeap;
+
+    for ( auto pair : frequencyMap )
+    {
+        minHeap.push( new Node( pair.first, pair.second ) );
+    }
+
+    while ( minHeap.size() != 1 )
+    {
+        Node* left = minHeap.top();
+        minHeap.pop();
+        Node* right = minHeap.top();
+        minHeap.pop();
+
+        int sum = left->frequency + right->frequency;
+        Node* newNode = new Node( L'\0', sum );
+        newNode->left = left;
+        newNode->right = right;
+        minHeap.push( newNode );
+    }
+
+    map<char, string> huffmanCodes;
+    generateHuffmanCodes( minHeap.top(), "", huffmanCodes );
+
+    return huffmanCodes;
+}
+
+string encodeText( const string& text, map<char, string>& huffmanCodes )
+{
+    string encodedText = "";
+    for ( char ch : text )
+    {
+        encodedText += huffmanCodes[ch];
+    }
+    return encodedText;
+}
+
+string decodeText( const string& encodedText, map<string, char>& reverseHuffmanCodes )
+{
+    string decodedText = "";
+    string codeBuffer = "";
+    for ( char bit : encodedText )
+    {
+        codeBuffer += bit;
+        if ( reverseHuffmanCodes.find( codeBuffer ) != reverseHuffmanCodes.end() )
         {
-            decoded += reverseMap[buffer];
-            buffer.clear();
+            decodedText += reverseHuffmanCodes[codeBuffer];
+            codeBuffer.clear();
         }
     }
-    return decoded;
+    return decodedText;
 }
 
-// ======== ХАФФМАН ========
-struct HuffmanNode
+double calculateAverageCodeLength( const map<char, string>& huffmanCodes, const map<char, int>& frequencyMap, int totalSymbols )
 {
-    char ch;
-    int freq;
-    HuffmanNode *left, *right;
-    HuffmanNode( char c, int f, HuffmanNode *l = nullptr, HuffmanNode *r = nullptr ) : ch( c ), freq( f ), left( l ), right( r )
+    double sumCodeLengths = 0.0;
+
+    for ( const auto& pair : huffmanCodes )
     {
+        char symbol = pair.first;
+        int codeLength = pair.second.length();
+        int frequency = frequencyMap.at( symbol );
+
+        sumCodeLengths += codeLength * frequency;
     }
-};
-struct CompareNode
-{
-    bool operator()( HuffmanNode *a, HuffmanNode *b )
-    {
-        return a->freq > b->freq;
-    }
-};
-void buildHuffmanTree( const std::map<char, int> &freqMap, HuffmanNode *&root )
-{
-    std::priority_queue<HuffmanNode *, std::vector<HuffmanNode *>, CompareNode> pq;
-    for ( auto &pair : freqMap ) pq.push( new HuffmanNode( pair.first, pair.second ) );
-    while ( pq.size() > 1 )
-    {
-        HuffmanNode *left = pq.top(); pq.pop();
-        HuffmanNode *right = pq.top(); pq.pop();
-        pq.push( new HuffmanNode( '\0', left->freq + right->freq, left, right ) );
-    }
-    root = pq.top();
-}
-void generateHuffmanCodes( HuffmanNode *node, const std::string &code, std::map<char, std::string> &codeMap )
-{
-    if ( !node ) return;
-    if ( node->ch != '\0' ) codeMap[node->ch] = code;
-    generateHuffmanCodes( node->left, code + "0", codeMap );
-    generateHuffmanCodes( node->right, code + "1", codeMap );
-}
-std::string huffmanCompress( const std::string &text, std::map<char, std::string> &codeMap )
-{
-    std::map<char, int> freqMap;
-    for ( char ch : text ) freqMap[ch]++;
-    HuffmanNode *root = nullptr;
-    buildHuffmanTree( freqMap, root );
-    generateHuffmanCodes( root, "", codeMap );
-    std::string encoded;
-    for ( char ch : text ) encoded += codeMap[ch];
-    return encoded;
+
+    return sumCodeLengths / totalSymbols;
 }
 
-// ======== MAIN ========
+double calculateVariance( const map<char, string>& huffmanCodes, const map<char, int>& frequencyMap, int totalSymbols, double averageLength )
+{
+    double squaredDifferenceSum = 0.0;
+
+    for ( const auto& pair : huffmanCodes )
+    {
+        char symbol = pair.first;
+        int codeLength = pair.second.length();
+        int frequency = frequencyMap.at( symbol );
+
+        double difference = codeLength - averageLength;
+        squaredDifferenceSum += frequency * pow( difference, 2 );
+    }
+
+    return squaredDifferenceSum / totalSymbols;
+}
+
+
 int main()
 {
-    setlocale( LC_ALL, "" );
+    SetConsoleCP( 1251 );
+    SetConsoleOutputCP( 1251 );
 
-    std::string text = "Фамилия Имя Отчество";
-    std::map<char, std::string> shannonCodeMap, huffmanCodeMap;
+    string inputFilename = "input.txt";
+    ifstream inputFile( inputFilename );
+    if ( !inputFile.is_open() )
+    {
+        cout << "Ошибка открытия файла..." << endl;
+        return 1;
+    }
 
-    // Шеннон-Фано
-    std::cout << "=== ШЕННОН-ФАНО ===\n";
-    std::string shannonEncoded = shannonFanoCompress( text, shannonCodeMap );
-    std::cout << "Закодированный текст: " << shannonEncoded << "\n";
+    string inputText;
+    getline( inputFile, inputText, '\0' );
+    inputFile.close();
 
-    // Хаффман
-    std::cout << "\n=== ХАФФМАН ===\n";
-    std::string huffmanEncoded = huffmanCompress( text, huffmanCodeMap );
-    std::cout << "Закодированный текст: " << huffmanEncoded << "\n";
+    // Строим дерево Хаффмана и получаем коды
+    map<char, string> huffmanCodes = buildHuffmanTree( inputText );
 
-    // Коэффициенты сжатия
-    int originalSize = text.size() * 8;
-    std::cout << "\nРазмер исходного текста: " << originalSize << " бит\n";
-    std::cout << "Размер текста (Шеннон-Фано): " << shannonEncoded.size() << " бит\n";
-    std::cout << "Размер текста (Хаффман): " << huffmanEncoded.size() << " бит\n";
+    wcout << L"Коды Хаффмана для каждого символа:\n";
+    for ( const auto& pair : huffmanCodes )
+    {
+        string characterRepresentation = pair.first == '\n' ? "\\n" : string( 1, pair.first );
+        cout << "\'" << characterRepresentation << "\': " << pair.second << endl;
+    }
+
+    // Кодируем текст
+    string encodedText = encodeText( inputText, huffmanCodes );
+
+    // Записываем закодированный текст в файл
+    ofstream encodedFile( L"encoded.txt" );
+    encodedFile << encodedText;
+    encodedFile.close();
+
+    // Создаем обратное отображение кодов для декодирования
+    map<string, char> reverseHuffmanCodes;
+    for ( const auto& pair : huffmanCodes )
+    {
+        reverseHuffmanCodes[pair.second] = pair.first;
+    }
+
+    // Декодируем текст
+    string decodedText = decodeText( encodedText, reverseHuffmanCodes );
+
+    // Записываем декодированный текст в файл
+    ofstream decodedFile( "decoded.txt" );
+    decodedFile << decodedText;
+    decodedFile.close();
+
+    // Подсчитываем частоты символов
+    map<char, int> frequencyMap;
+    for ( wchar_t ch : inputText )
+    {
+        frequencyMap[ch]++;
+    }
+
+    int totalSymbols = inputText.length();
+
+    // Рассчитываем среднюю длину кода
+    double averageCodeLength = calculateAverageCodeLength( huffmanCodes, frequencyMap, totalSymbols );
+    cout << "Средняя длина кода: " << averageCodeLength << endl;
+
+    // Рассчитываем дисперсию длины кода
+    double variance = calculateVariance( huffmanCodes, frequencyMap, totalSymbols, averageCodeLength );
+    cout << "Дисперсия: " << variance << endl;
+
+    // Размер исходного и сжатого текста
+    size_t originalSize = inputText.length() * 8;
+    size_t compressedSize = encodedText.length();
+    cout << "Размер исходного текста: " << originalSize << " бит\n";
+    cout << "Размер сжатого текста: " << compressedSize << " бит\n";
+    cout << "Коэффициент сжатия: " << static_cast<double>( originalSize ) / compressedSize << endl;
 
     return 0;
 }
+
